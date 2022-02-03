@@ -4,9 +4,16 @@ import android.content.Intent
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
     lateinit var manejadorArchivo: FileHandler//incorporaci[on del FileHandler
@@ -16,6 +23,8 @@ class LoginActivity : AppCompatActivity() {
     lateinit var buttonNewUser: Button
     lateinit var checkBoxRecordarme: CheckBox//variable para comporbar el checked
     lateinit var mediaPlayer:MediaPlayer
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -23,7 +32,8 @@ class LoginActivity : AppCompatActivity() {
         manejadorArchivo = SharedPreferencesManager(this)//referencia a esta actividad el prefernce Manager
         //manejadorArchivo = ExternalFilesManager(this)
         //manejadorArchivo = SharedPreferencesManager(this)
-
+        // Initialize Firebase Auth
+        auth = Firebase.auth
 
         editTextEmail = findViewById(R.id.editTextEmail)
         editTextPassword = findViewById(R.id.editTextPassword)
@@ -45,9 +55,10 @@ class LoginActivity : AppCompatActivity() {
             GuardarDatosEnPreferencias()//se guarda la información en caso de estar activado el checked
 
             //Si pasa validación de datos requeridos, ir a pantalla principal
-            val intencion = Intent(this, MainActivity::class.java)
-            intencion.putExtra(EXTRA_LOGIN, email)
-            startActivity(intencion)
+            //val intencion = Intent(this, MainActivity::class.java)
+            //intencion.putExtra(EXTRA_LOGIN, email)
+            //startActivity(intencion)
+            AutenticarUsuario(email, clave)
         }
         buttonNewUser.setOnClickListener{
 
@@ -105,4 +116,29 @@ class LoginActivity : AppCompatActivity() {
         mediaPlayer.release()
         super.onDestroy()
     }
+
+    fun AutenticarUsuario(email:String, password:String){
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    Log.d(EXTRA_LOGIN, "signInWithEmail:success")
+                    //Si pasa validación de datos requeridos, ir a pantalla principal
+                    val intencion = Intent(this, MainActivity::class.java)
+                    intencion.putExtra(EXTRA_LOGIN, auth.currentUser!!.email)
+                    startActivity(intencion)
+                    //finish()
+                } else {
+                    Log.w(EXTRA_LOGIN, "signInWithEmail:failure", task.exception)
+                    Toast.makeText(baseContext, task.exception!!.message,
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
 }
+
+
+
+
+
+
