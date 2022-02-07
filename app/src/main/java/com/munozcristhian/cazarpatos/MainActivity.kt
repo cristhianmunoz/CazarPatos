@@ -3,7 +3,6 @@ package com.munozcristhian.cazarpatos
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
@@ -14,9 +13,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
     lateinit var textViewUsuario: TextView
@@ -27,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     var anchoPantalla = 0
     var alturaPantalla = 0
     var gameOver = false
+    lateinit var mAdView : AdView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +41,13 @@ class MainActivity : AppCompatActivity() {
         textViewContador = findViewById(R.id.textViewContador)
         textViewTiempo = findViewById(R.id.textViewTiempo)
         imageViewPato = findViewById(R.id.imageViewPato)
+
+        //Inicializando publicidad
+        MobileAds.initialize(this) {}
+
+        mAdView = findViewById(R.id.adView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
 
         //Obtener el usuario de pantalla login
         val extras = intent.extras ?: return
